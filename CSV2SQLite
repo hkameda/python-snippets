@@ -1,0 +1,85 @@
+########################################################
+# Excel can not treat big csv file becase of data volume
+#########################################################
+import csv,pprint,sys,os
+import shutil
+import tempfile
+# import urllib.request
+import sqlite3
+import datetime
+##########################################################
+# initial
+##########################################################
+dt1 = datetime.datetime.now()
+# please change directory
+input_dir_path ='csv'
+output_dir_path ='csv2'
+csvfile_name = 'c001' 
+os.makedirs(new_dir_path,exist_ok=True)
+##########################################################
+# CREATE TABE in SQLITE3 Memory Dabatbase
+##########################################################
+dt2 = datetime.datetime.now()
+print (dt2,": Create Table in SQLITE3 Memory Dabatbase Started")
+
+conn =sqlite3.connect(':memory:')
+cur = conn.cursor()
+### please change DDL
+cur.execute("""create table c001
+(TEST_ID     CHAR(12) NOT NULL,
+ TEST_MEMO   VARCHAR(400),
+ TEST_REMARK VARCHAR(4000));""")
+##########################################################
+# READ CSV FILE & INSERT TABLE
+##########################################################
+dt2 = datetime.datetime.now()
+print (dt2,": INSERT into Each Tables from Exist CSV Started")
+
+path_input = input_dir_path +'/' +csvfile_name + '.csv'
+is_file = os.path.isfile(path_input)
+if is_file:
+	print("------------------------------ CSV is found.")
+else:
+	print("------------------------------ CSV is not found,")
+	sys.exit()
+
+cur = conn.cursor()
+
+with open(path_input, 'r') as f:
+	b=csv.reader(f,quotechar='"')
+	header=next(b)
+	for t in b:
+		cur.execute('INSERT INTO c001 values(?,?,?);',t)
+
+##########################################################
+# EXTRACT BY SQL
+##########################################################
+dt2 = datetime.datetime.now()
+print (dt2,": SELECT information from Joined Tables Started")
+### plaese change sql 
+cur.execute("""SELECT 
+ TEST_ID,
+ TEST_MEMO,
+ TEST_REMARK 
+ FROM c001
+ WHERE 1 = 1
+ AND   TEST_MEMO LIKE '%TEST%'
+ ORDER BY TEST_ID DESC;""")
+##########################################################
+# OUTPUT RESULT
+##########################################################
+cdt = dt1.strftime('%y%m%d_%H%M%S') 
+Fname = output_dir_path +csvfile_name +'_after_' + cdt + '.csv'
+data = cur.fetchall()
+
+with open(Fname, 'w' , newline='' ) as csvfile:
+	writer = csv.writer(csvfile,quoting=csv.QUOTE_ALL)
+  ### plaese change header for output layout,SQL results 
+	header =["TEST ID","TEST MEMO","TEST REMARKS"]
+	writer.writerow(header)
+	for row in data:
+		writer.writerow(row)
+	dt2 = datetime.datetime.now()
+	print (dt2,": Output result CSV File Ended")
+	print ("=========== Output Joined File Name:", Fname )
+### END ###
