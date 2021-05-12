@@ -1,4 +1,4 @@
-########################################################
+#########################################################
 # Excel can not treat big csv file becase of data volume
 #########################################################
 import csv,pprint,sys,os
@@ -11,11 +11,11 @@ import datetime
 # initial
 ##########################################################
 dt1 = datetime.datetime.now()
-# please change directory
+### please change directory and file name
 input_dir_path ='csv'
 output_dir_path ='csv2'
 csvfile_name = 'c001' 
-os.makedirs(new_dir_path,exist_ok=True)
+os.makedirs(input_dir_path,exist_ok=True)
 ##########################################################
 # CREATE TABE in SQLITE3 Memory Dabatbase
 ##########################################################
@@ -24,7 +24,8 @@ print (dt2,": Create Table in SQLITE3 Memory Dabatbase Started")
 
 conn =sqlite3.connect(':memory:')
 cur = conn.cursor()
-### please change DDL
+
+### please change DDL 
 cur.execute("""create table c001
 (TEST_ID     CHAR(12) NOT NULL,
  TEST_MEMO   VARCHAR(400),
@@ -38,9 +39,9 @@ print (dt2,": INSERT into Each Tables from Exist CSV Started")
 path_input = input_dir_path +'/' +csvfile_name + '.csv'
 is_file = os.path.isfile(path_input)
 if is_file:
-	print("------------------------------ CSV is found.")
+	print("-----------------------" + path_input + "  is found.")
 else:
-	print("------------------------------ CSV is not found,")
+	print("-----------------------" + path_input + " is not found.")
 	sys.exit()
 
 cur = conn.cursor()
@@ -69,7 +70,7 @@ cur.execute("""SELECT
 # OUTPUT RESULT
 ##########################################################
 cdt = dt1.strftime('%y%m%d_%H%M%S') 
-Fname = output_dir_path +csvfile_name +'_after_' + cdt + '.csv'
+Fname = output_dir_path + '/' + csvfile_name +'_after_' + cdt + '.csv'
 data = cur.fetchall()
 
 with open(Fname, 'w' , newline='' ) as csvfile:
